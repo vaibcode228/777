@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bernix</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  #snow {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  .glass {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 62px 48px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .avatar-container {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    transform: translateY(-10px);
+  }
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+    object-fit: cover;
+    display: block;
+    background: #111;
+  }
+
+  .dot-large {
+    position: absolute;
+    bottom: -8px;
+    right: -12px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 2;
+  }
+
+  .thought-anchor {
+    position: absolute;
+    top: -44px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    z-index: 3;
+  }
+
+  .thought-bubble {
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+    font-style: italic;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .diamond {
+    position: absolute;
+    bottom: -13px;
+    left: 50%;
+    margin-left: -4px;
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    transform: rotate(45deg);
+    z-index: 4;
+  }
+
+  .text-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .text-content h1 {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+  }
+
+  .subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .tagline {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* ── TG КРУГИ ── */
+  .tg-row {
+    display: flex;
+    gap: 18px;
+    animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  }
+
+  .tg-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.18s ease;
+  }
+
+  .tg-btn:hover { transform: translateY(-3px); }
+  .tg-btn:active { transform: translateY(0) scale(0.95); }
+
+  .tg-label {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .tg-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+
+  .tg-btn:hover .tg-circle {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* ── SCRIPT LIST — широкий низкий прямоугольник, текст горизонтально ── */
+  .script-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+  }
+
+  .script-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .script-btn:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  .script-btn span {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+</style>
+</head>
+<body>
+  <canvas id="snow"></canvas>
+
+  <div class="wrap">
+    <div class="glass">
+      
+      <div class="avatar-container">
+        <img class="avatar" alt="avatar" src="https://raw.githubusercontent.com/zaicewanton1-dotcom/777/refs/heads/main/20635c23a36acc7b5d864c58e99cee4a.jpg" />
+        <div class="dot-large"></div>
+        
+        <div class="thought-anchor" id="thought">
+          <div class="thought-bubble">
+            I love vibecoding
+            <div class="diamond" id="diamond"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-content">
+        <h1>bernix</h1>
+        <p class="subtitle">Russia · only Lua</p>
+        <p class="tagline">✦ | I make Lua scripts</p>
+      </div>
+
+    </div>
+
+    <!-- TG КРУГИ -->
+    <div class="tg-row">
+
+      <!-- CHANNEL -->
+      <a class="tg-btn" href="https://t.me/bernixlir" target="_blank" rel="noopener">
+        <span class="tg-label">channel</span>
+        <div class="tg-circle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21.5 4.5L2.5 12.5L9 14.5L15 8L10 15L17 19.5L21.5 4.5Z"
+                  fill="rgba(255,255,255,0.8)"
+                  stroke="rgba(255,255,255,0.3)" stroke-width="0.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+
+      <!-- PM -->
+      <a class="tg-btn" href="https://t.me/swuevi" target="_blank" rel="noopener">
+        <span class="tg-label">pm</span>
+        <div class="tg-circle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21.5 4.5L2.5 12.5L9 14.5L15 8L10 15L17 19.5L21.5 4.5Z"
+                  fill="rgba(255,255,255,0.55)"
+                  stroke="rgba(255,255,255,0.25)" stroke-width="0.8" stroke-linejoin="round"/>
+            <path d="M10 15L15 8" stroke="rgba(255,255,255,0.4)" stroke-width="0.6"/>
+          </svg>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- SCRIPT LIST -->
+    <a class="script-btn" href="#" target="_blank" rel="noopener">
+      <span>script list</span>
+    </a>
+  </div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  НАСТРОЙКИ — МЕНЯЙ ЧИСЛА ЗДЕСЬ И ПЕРЕЗАПУСКАЙ
+// ═══════════════════════════════════════════════════
+const CONFIG = {
+  thoughtTop:    -44,  // высота мысли над аватаркой
+  diamondBottom: -13,  // отрыв ромбика от облачка
+};
+// ═══════════════════════════════════════════════════
+
+(function () {
+  const thought = document.getElementById("thought");
+  const diamond = document.getElementById("diamond");
+
+  thought.style.top = CONFIG.thoughtTop + "px";
+  diamond.style.bottom = CONFIG.diamondBottom + "px";
+
+  console.log("[CONFIG] thoughtTop =", CONFIG.thoughtTop, "| diamondBottom =", CONFIG.diamondBottom);
+
+  // ── СНЕГ ──
+  const canvas = document.getElementById("snow");
+  const ctx = canvas.getContext("2d");
+
+  let W, H, flakes = [];
+  const COUNT_BASE = 0.00012;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    const target = Math.max(60, Math.floor(W * H * COUNT_BASE));
+    flakes = [];
+    for (let i = 0; i < target; i++) flakes.push(makeFlake(true));
+  }
+
+  function makeFlake(randomY) {
+    return {
+      x: Math.random() * W,
+      y: randomY ? Math.random() * H : -10,
+      r: Math.random() * 2.6 + 0.8,
+      vy: Math.random() * 0.7 + 0.3,
+      vx: Math.random() * 0.6 - 0.3,
+      sway: Math.random() * Math.PI * 2,
+      swaySpeed: Math.random() * 0.02 + 0.005,
+      alpha: Math.random() * 0.5 + 0.4
+    };
+  }
+
+  function step() {
+    ctx.clearRect(0, 0, W, H);
+    for (const f of flakes) {
+      f.sway += f.swaySpeed;
+      f.y += f.vy;
+      f.x += f.vx + Math.sin(f.sway) * 0.4;
+      if (f.y > H + 10 || f.x < -10 || f.x > W + 10) {
+        Object.assign(f, makeFlake(false));
+        f.x = Math.random() * W;
+      }
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, " + f.alpha + ")";
+      ctx.fill();
+    }
+    requestAnimationFrame(step);
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+  step();
+})();
+</script>
+</body>
+</html>
