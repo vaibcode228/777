@@ -20,7 +20,7 @@ NeverLose.Lib = lib;
 NeverLose.ScreenGui = lib.scr;
 NeverLose.AccentColor = lib.theme.accent;
 NeverLose.MainColor = lib.theme.bg;
-NeverLose.GlobalLogo = lib.logo;
+NeverLose.GlobalLogo = "https://github.com/vaibcode228/777/blob/main/io.png?raw=true";
 NeverLose.EnabledBlur = false;
 NeverLose.UnloadEnabled = false;
 NeverLose.GlobalSignals = {};
@@ -2107,7 +2107,7 @@ local function params(cfg, def)
 	return cfg
 end
 
-shitaroebet.logo = asset({ "logous.png", "assets/logous.png", "shitaroebet/logous.png" })
+shitaroebet.logo = "https://github.com/vaibcode228/777/blob/main/io.png?raw=true"
 
 local scr = new("ScreenGui", {
 	Name = rnd(),
